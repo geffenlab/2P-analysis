@@ -1,6 +1,10 @@
 clear
+
+%% Enter info here
 mouse = 'K024';
 dataFolder = '20161025K024';
+
+%% make stacks
 dataPath = ['E:\' mouse '\' dataFolder '\'];
 folders = dir(dataPath);
 folders = folders([folders.isdir]); 
@@ -23,7 +27,12 @@ end
 toc
     
 %% Now transfer the files to the analysis computer
-copyfile([dataPath dataFolder '_tifStacks\'], ['\\DESKTOP-GK8OVIP\data\' mouse '\'])
+if ~isdir(['\\DESKTOP-GK8OVIP\data\' mouse '\' dataFolder '_tifStacks\'])
+    mkdir(['\\DESKTOP-GK8OVIP\data\' mouse '\' dataFolder '_tifStacks\']);
+end
+copyfile([dataPath dataFolder '_tifStacks'], ['\\DESKTOP-GK8OVIP\data\' mouse '\' dataFolder '_tifStacks\'])
+
+disp('finished');
     
     
     
