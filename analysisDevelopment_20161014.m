@@ -1,6 +1,6 @@
 % load processed file
 clear
-load('/Volumes/Untitled/K024/F_K024_20161026K024_tifStacks_plane1_Nk25_proc.mat')
+load('E:\dataAnalysed\K019\20160921K019_tifStacks\1\F_K019_20160921K019_tifStacks_plane1_Nk25_proc.mat')
 
 %%
 n = find(dat.cl.iscell==1);
@@ -45,20 +45,20 @@ for ii=1:4:length(n)
 end
 
 %%
-f1 = figure;
-colormap gray
-imagesc(scaleK019);
+% f1 = figure;
+% colormap gray
+% imagesc(scaleK019);
 for ii = 1:length(n)
-img = zeros(1,509*506);
+img = zeros(1,size(dat.img1.V,1)*size(dat.img1.V,2));
 img(dat.stat(n(ii)).ipix)=1;
-img = reshape(img,509,506);
+img = reshape(img,size(dat.img1.V,1),size(dat.img1.V,2));
 c = regionprops(img,'Centroid');
-c = round(c.Centroid);
+cent(ii,:) = round(c.Centroid);
 celln = num2str(ii);
 % t = text(c(1)-5,c(2)+7,celln); t.Color = [1 1 0];
 stats = [bwboundaries(img)];
 hold on
-plot(stats{1}(:,2),stats{1}(:,1),'y')
+% plot(stats{1}(:,2),stats{1}(:,1),'y')
 end
 axis off
 axis equal
