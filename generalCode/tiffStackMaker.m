@@ -23,18 +23,18 @@ if ~isdir(saveFolder)
 end
 stack = imread([folder fnames(1).name]);
 ind = 1; nFiles = 1;
-imwrite(stack, [saveFolder saveFileName '_' num2str(ind) '.tif'], 'writemode', 'append','Compression','None');
-for k = 2:length(fnames)
+% imwrite(stack, [saveFolder saveFileName '_' num2str(ind) '.tif'], 'writemode', 'append','Compression','None');
+for k = 1:length(fnames)
     stack = imread([folder fnames(k).name ]);
     imwrite(stack, [saveFolder saveFileName '_' num2str(ind) '.tif'], 'writemode', 'append','Compression','None');
     if mod(k,1000)==0
         disp(['Written ' num2str(k) ' frames of ' num2str(length(fnames))])
-    end
-    nFiles = nFiles+1;
+    end   
     if nFiles+1>2000
         ind = ind+1; disp(ind)
         nFiles =1;
     end
+    nFiles = nFiles+1;
 end
 disp('Written all tifs')
 done = 1;
