@@ -1,6 +1,6 @@
 % load processed file
 clear
-load('E:\dataAnalysed\K019\20160921K019_tifStacks\1\F_K019_20160921K019_tifStacks_plane1_Nk25_proc.mat')
+load('E:\dataAnalysed\K051_OGB1\20170118K051_tifStacks\2\F_K051_OGB1_20170118K051_tifStacks_plane1_proc.mat')
 
 %%
 n = find(dat.cl.iscell==1);
