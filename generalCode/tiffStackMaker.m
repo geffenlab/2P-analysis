@@ -26,7 +26,7 @@ ind = 1; nFiles = 1;
 % imwrite(stack, [saveFolder saveFileName '_' num2str(ind) '.tif'], 'writemode', 'append','Compression','None');
 for k = 1:length(fnames)
     stack = imread([folder fnames(k).name ]);
-    imwrite(stack, [saveFolder saveFileName '_' num2str(ind) '.tif'], 'writemode', 'append','Compression','None');
+    imwrite(stack, [saveFolder saveFileName '_' sprintf('%02d',ind) '.tif'], 'writemode', 'append','Compression','None');
     if mod(k,1000)==0
         disp(['Written ' num2str(k) ' frames of ' num2str(length(fnames))])
     end   
