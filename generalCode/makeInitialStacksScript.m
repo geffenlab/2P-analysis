@@ -2,7 +2,7 @@ clear
 
 % Enter info here
 mouse = 'K048';
-dateOfRecording = '20170307';
+dateOfRecording = '20170309';
 dataFolder = [dateOfRecording mouse];
 
 %% make stacks
