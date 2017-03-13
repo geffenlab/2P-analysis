@@ -1,22 +1,22 @@
 % load processed file
 clear
 mouse = 'K048';
-date = '20170301';
-exptNo = '4';
+date = '20170309';
+exptNo = '1';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
 
 %%
 n = find([dat.stat.iscell]==1);
-traces = dat.Fcell{1}(n,:);
-npilTraces = dat.FcellNeu{1}(n,:);
-npilCoeffs = [dat.stat(n).neuropilCoefficient]';
-npilSubTraces = traces-(npilTraces.*npilCoeffs);
+traces = dat.Fcell{1}(n,:); % raw fluorescence
+npilTraces = dat.FcellNeu{1}(n,:); % neuropil estimates
+npilCoeffs = [dat.stat(n).neuropilCoefficient]'; % neuropil coefficients
+npilSubTraces = traces-(npilTraces.*npilCoeffs); % subtract neuropil from traces
 
-data.caTraces = npilSubTraces;
 
-c = {dat.stat(n).c};
-st = {dat.stat(n).st};
+
+% c = {dat.stat(n).c}; % calcium traces
+% st = {dat.stat(n).st}; % deconvolved spikes
 
 
 % npilCoef =[dat.cl.dcell{n-length(dat.stat0)}]; npilCoef = [npilCoef.B];
@@ -33,7 +33,7 @@ st = {dat.stat(n).st};
 
 stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*.mat']);
-load([stimLoc files(1).name])
+load([stimLoc files(2).name])
 
 % Work out frame rate
 fs=400000;
@@ -52,6 +52,7 @@ if length(npilSubTraces)<length(data.frameTimes)
 else
     npilSubTraces = npilSubTraces(:,1:length(data.frameTimes));
 end
+data.caTraces = npilSubTraces;
 
 % fr = 29.534;
 % Work out events
@@ -73,8 +74,8 @@ postEv = ceil(5*fr); % 3 seconds post stim
 ind=1; raster = zeros(size(npilTraces,1),preEv+postEv+1,length(eventsOn));
 for ii=1:length(eventsOn) % ignore 1st event because will be the start recording event - events from then on are relevant
     raster(:,:,ind) = npilSubTraces(:,eventsOn(ii)-preEv: eventsOn(ii)+postEv);
-%     raster(:,:,ind) = (raster(:,:,ind)-mean(squeeze(raster(:,1:preEv-1,ind)),2))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
-    raster(:,:,ind) = (raster(:,:,ind))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
+    raster(:,:,ind) = (raster(:,:,ind)-mean(squeeze(raster(:,1:preEv-1,ind)),2))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
+%     raster(:,:,ind) = (raster(:,:,ind))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
     for jj=1:size(raster,1)
         raster(jj,:,ii) = filtfilt(b,a,double(raster(jj,:,ii)));
     end
@@ -83,6 +84,7 @@ end
 preRast = npilSubTraces(:,eventsOn(1)-preEv:eventsOn(1));
 raster = permute(raster,[3,2,1]);
 
+%% spike raster
 spikeTraces = zeros(size(npilSubTraces));
 for ii=1:size(spikeTraces,1)
     spikeTraces(ii,st{ii})=c{ii};
@@ -103,7 +105,7 @@ spikeRaster = permute(spikeRaster,[3,2,1]);
 
 
 %% Load stimulus info
-load([stimLoc files(1).name])
+load([stimLoc files(2).name])
 % data.stimInfo = stimInfo;
 if exist('attnOrder','var')
     index(:,2) =70-index(:,1);
@@ -117,7 +119,8 @@ elseif exist('toneOrder','var')
 elseif exist('params','var')
     order = repmat([1,2]',length(eventsOn)/2,1);
 elseif exist('stimInfo','var')
-    order = repmat(stimInfo.order,1,length(eventsOn)/length(stimInfo.order))';
+    p = stimInfo.index(stimInfo.order,:);
+    order = repmat(p',1,length(eventsOn)/length(stimInfo.order))';
 else
     order = repmat(stimInfo.index(stimInfo.order,:),2,1); 
 end
@@ -209,9 +212,10 @@ for ii=1:size(psth,3)
 end
 
 %% FOR quick tonotopy
-uT = unique(order);
-leg = {'5 kHz','8.891 kHz','15.811 kHz','28.117 kHz','50 kHz'};
+uT = unique(order(:,1));
+% leg = {'5 kHz','8.891 kHz','15.811 kHz','28.117 kHz','50 kHz'};
 cs = get(groot,'DefaultAxesColorOrder');
+cs=[cs;cs;cs;cs];
 plotFig = 0;
 psth=[]; sempsth=[];
 for jj = 1:size(raster,3)
@@ -221,7 +225,7 @@ for jj = 1:size(raster,3)
         sempsth(ii,:,jj) = std(raster(rows,:,jj))./sqrt(length(rows)-1);     
     end
        h(:,jj) = ttest(psth(:,1:preEv,jj)',psth(:,preEv+1:preEv+preEv,jj)','alpha',0.05/5);
-%       h_ttest(:,jj) = ttest(psth(:,1:preEv,jj)',psth(:,preEv+1:preEv+preEv,jj)','alpha',0.05/5);
+%        h_ttest(:,jj) = ttest(psth(:,1:preEv,jj)',psth(:,preEv+1:preEv+preEv,jj)','alpha',0.05/5);
     if plotFig==1
         time = -preEv/fr:1/fr:(postEv)/fr;
         subplot(1,2,1)
@@ -237,7 +241,7 @@ for jj = 1:size(raster,3)
         a = psth(:,:,jj); b = sempsth(:,:,jj);
         plot([0 0],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
         plot([stimInfo.tDur/1000 stimInfo.tDur/1000],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
-        legend(leg)
+%         legend(leg)
         axis tight
         subplot(1,2,2)
         imagesc(raster(:,:,jj))
@@ -519,9 +523,10 @@ colormap gray
 im = dat.mimg(:,:,2);
 im=brighten(im,1);
 imagesc(im);
-uStim = unique(order);
+uStim = unique(order(:,1));
 % ci = floor(length(co)/length(uT));
 cs = get(groot,'defaultAxesColorOrder');
+cs=[cs;cs;cs;cs];
 for ii = 1:length(n)
     img = zeros(1,size(im,1)*size(im,2));
     img(dat.stat(n(ii)).ipix)=1;
