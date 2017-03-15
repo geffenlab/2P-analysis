@@ -17,7 +17,7 @@ if isempty(fnames)
 end
 
 
-stackInfo = imfinfo([folder fnames(1).name]);
+% stackInfo = imfinfo([folder fnames(1).name]);
 if ~isdir(saveFolder)
     mkdir(saveFolder)
 end
