@@ -1,7 +1,7 @@
 % load processed file
 clear
-mouse = 'K048';
-date = '20170309';
+mouse = 'K053';
+date = '20170318';
 exptNo = '1';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
@@ -32,8 +32,8 @@ npilSubTraces = traces-(npilTraces.*npilCoeffs); % subtract neuropil from traces
 %% Load the stimulus info
 
 stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
-files = dir([stimLoc '*.mat']);
-load([stimLoc files(2).name])
+files = dir([stimLoc '*events.mat']);
+load([stimLoc files.name])
 
 % Work out frame rate
 fs=400000;
@@ -92,8 +92,8 @@ end
 
 ind=1; spikeRaster = zeros(size(npilTraces,1),preEv+postEv+1,length(eventsOn));
 for ii=1:length(eventsOn) % ignore 1st event because will be the start recording event - events from then on are relevant
-    spikeRaster(:,:,ind) = spikeTraces(:,eventsOn(ii)-preEv: eventsOn(ii)+postEv);
-%     raster(:,:,ind) = (raster(:,:,ind)-mean(squeeze(raster(:,1:preEv-1,ind)),2))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
+%     spikeRaster(:,:,ind) = spikeTraces(:,eventsOn(ii)-preEv: eventsOn(ii)+postEv);
+    raster(:,:,ind) = (raster(:,:,ind)-mean(squeeze(raster(:,1:preEv-1,ind)),2))./std(squeeze(raster(:,1:preEv-1,ind)),[],2);
 %     spikeRaster(:,:,ind) = (spikeRaster(:,:,ind))./std(squeeze(spikeRaster(:,1:preEv-1,ind)),[],2);
 %     for jj=1:size(spikeRaster,1)
 %         spikeRaster(jj,:,ii) = filtfilt(b,a,double(spikeRaster(jj,:,ii)));
@@ -124,7 +124,7 @@ elseif exist('stimInfo','var')
 else
     order = repmat(stimInfo.index(stimInfo.order,:),2,1); 
 end
-[x,ind]=sortrows(order);
+[x,ind]=sortrows(order(:,1));
 raster = raster(ind,:,:);
 spikeRaster = spikeRaster(ind,:,:);
 
@@ -213,7 +213,7 @@ end
 
 %% FOR quick tonotopy
 uT = unique(order(:,1));
-% leg = {'5 kHz','8.891 kHz','15.811 kHz','28.117 kHz','50 kHz'};
+leg = {'5 kHz','8.891 kHz','15.811 kHz','28.117 kHz','50 kHz'};
 cs = get(groot,'DefaultAxesColorOrder');
 cs=[cs;cs;cs;cs];
 plotFig = 0;
@@ -448,8 +448,9 @@ end
 
 %% for FM tones
 cs = get(groot,'DefaultAxesColorOrder');
+cs = [cs;cs;cs];
 uStim = unique(order);
-leg = {'20 Hz','25 Hz','30 Hz','35 Hz', '40 Hz'};
+leg = uStim;
 plotFig = 1;
 psth=[]; sempsth=[]; h=[];
 for jj = 1:size(raster,3)
@@ -474,11 +475,11 @@ for jj = 1:size(raster,3)
         a = psth(:,:,jj); b = sempsth(:,:,jj);
         plot([0 0],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
         plot([stimInfo.stimDur/1000 stimInfo.stimDur/1000],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
-        legend(leg)
+%         legend(leg)
         axis tight
         subplot(1,2,2)
         imagesc(raster(:,:,jj))
-        pause()
+        pause(0.5)
         clf
     end
 end
