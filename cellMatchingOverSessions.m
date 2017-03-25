@@ -9,12 +9,14 @@ expt1 = {mouse,date1,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date1 mouse '_tifStacks_plane1_proc.mat'])
 n1 = find([dat.stat.iscell]==1);
-im = dat.mimg(:,:,2);
-im = uint16(im);
+im = dat.mimg_proc(:,:,2);
+im_norm1 =dat.mimg(:,:,2);
+im_norm1 = uint16(im_norm1);
 f1=figure;
 colormap gray
-imb = brighten(double(im),1);
-imagesc(imb)
+% imb = brighten(double(im),0.25);
+% imagesc(imb)
+imagesc(im)
 dat1 = dat;
 
 % get centroids and boundaries
@@ -33,19 +35,21 @@ end
 
 %% Now open the file you want to map with it:
 
-date2 = '20170320'; % start with the pre-fear conditioning recording
-exptNo = '1';
+date2 = '20170318'; % start with the pre-fear conditioning recording
+exptNo = '2';
 expt2 = {mouse,date2,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date2 mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date2 mouse '_tifStacks_plane1_proc.mat'])
 n2 = find([dat.stat.iscell]==1);
-im2 = dat.mimg(:,:,2);
-im2 = uint16(im2);
+im2 = dat.mimg_proc(:,:,2);
+im_norm2 = dat.mimg(:,:,2);
+im_norm2 = uint16(im_norm2);
 f2 = figure;
 colormap gray
-im2b = brighten(double(im2),1);
-im2b = brighten(double(im2b),0.25);
-imagesc(im2b)
+% im2b = brighten(double(im2),1);
+% im2b = brighten(double(im2b),0.25);
+% imagesc(im2b)
+imagesc(im2)
 dat2 = dat;
 
 
@@ -125,19 +129,27 @@ for ii=1:length(n1)
 end
 
 % plot boundaries of selected cells
-thresh = 6;
+thresh = 20;
 index = 1:length(n1);
 index2 = NaN(size(index));
 index2(nnd<thresh) = nn(nnd<thresh);
+while sum(~isnan(index2))> length(unique(index2(~isnan(index2))))
+    thresh = thresh-0.1;
+    index = 1:length(n1);
+    index2 = NaN(size(index));
+    index2(nnd<thresh) = nn(nnd<thresh);
+end
 f5 = figure;
 colormap gray
-imagesc(im)
+imagesc(im_norm1)
 hold on
 for ii=1:length(index2)
     if ~isnan(index2(ii))
-    plot(boundaries{index(ii)}(:,2),boundaries{index(ii)}(:,1),'Color','g','LineWidth',1.5)
-    plot(boundaries2{index2(ii)}(:,2),boundaries2{index2(ii)}(:,1),'Color','m','LineWidth',1.5)
-          pause()
+        plot(boundaries{index(ii)}(:,2),boundaries{index(ii)}(:,1),'Color','g','LineWidth',1.5)
+        plot(boundaries2{index2(ii)}(:,2),boundaries2{index2(ii)}(:,1),'Color','m','LineWidth',1.5)
+        text(cent(ii,1),cent(ii,2),num2str(ii),'Color','m');
+        text(cent2(index2(ii),1),cent2(index2(ii),2),num2str(ii),'Color','y')
+        pause()
     end
 end
 plot(cent(index,1),cent(index,2),'gx')
@@ -159,6 +171,8 @@ cellMatching.refMovingPoints = movingPoints;
 cellMatching.imRegMethod = method;
 cellMatching.threshold = thresh;
 cellMatching.ROIs = {boundaries,boundaries2};
+cellMatching.centroids = {cent,cent2};
+
 
 save(['E:\dataAnalysed\' mouse '\' mouse '_' date1 '_' date2 '_cellMatch_FRA.mat'],'cellMatching')
 

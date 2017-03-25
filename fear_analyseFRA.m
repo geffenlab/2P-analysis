@@ -3,7 +3,7 @@
 % load processed file
 clear
 mouse = 'K048';
-date = '20170315';
+date = '20170322';
 exptNo = '2';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
@@ -109,7 +109,7 @@ cs=cs(1:floor(length(cs)/length(uT)):floor(length(cs)/length(uT))*length(uT),:);
 plotFig = 1;
 
 index = find(ha==1);
-for ff = 44:sum(ha)
+for ff = 40:sum(ha)
     jj = index(ff);
     psth = zeros(length(uT),size(raster,2));
     sempsth = psth;

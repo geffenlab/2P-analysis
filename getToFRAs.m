@@ -1,4 +1,4 @@
-function [FRA_out,uT,uA] = getToFRAs(cmSessions,mouse,dataLoc,cm,ss)
+function [spFRA_out,FRA_out,uT,uA] = getToFRAs(cmSessions,mouse,dataLoc,cm,ss)
 load([dataLoc mouse '\' cmSessions(cm).name])
 date1 = cell2mat(cellMatching.session{ss}(2)); % start with the pre-fear conditioning recording
 exptNo = cell2mat(cellMatching.session{ss}(3));
@@ -72,6 +72,12 @@ for ii = 1:length(index2)
     FRA_out(:,:,index2(ii)) = FRA(:,:,index(ii));
 end
 
+spFRA_out = NaN(size(spike_FRA,1),size(spike_FRA,2),length(cellMatching.index));
+index = cellMatching.index(~isnan(cellMatching.index(:,ss)),ss);
+index2 = find(~isnan(cellMatching.index(:,ss)));
+for ii = 1:length(index2)
+    spFRA_out(:,:,index2(ii)) = spike_FRA(:,:,index(ii));
+end
 
 uT = unique(x(:,1));
 uA = unique(x(:,2));
