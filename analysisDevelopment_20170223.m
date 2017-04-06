@@ -1,7 +1,7 @@
 % load processed file
 clear
-mouse = 'K053';
-date = '20170318';
+mouse = 'K056';
+date = '20170324';
 exptNo = '1';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
@@ -105,7 +105,10 @@ spikeRaster = permute(spikeRaster,[3,2,1]);
 
 
 %% Load stimulus info
-load([stimLoc files(2).name])
+stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
+files = dir([stimLoc '*stimInfo.mat']);
+load([stimLoc files.name])
+
 % data.stimInfo = stimInfo;
 if exist('attnOrder','var')
     index(:,2) =70-index(:,1);
@@ -216,7 +219,7 @@ uT = unique(order(:,1));
 leg = {'5 kHz','8.891 kHz','15.811 kHz','28.117 kHz','50 kHz'};
 cs = get(groot,'DefaultAxesColorOrder');
 cs=[cs;cs;cs;cs];
-plotFig = 0;
+plotFig = 1;
 psth=[]; sempsth=[];
 for jj = 1:size(raster,3)
     for ii=1:length(uT)

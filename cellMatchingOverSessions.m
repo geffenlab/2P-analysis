@@ -2,9 +2,9 @@
 
 clear
 close all
-mouse = 'K048';
-date1 = '20170315'; % start with the pre-fear conditioning recording
-exptNo = '2';
+mouse = 'K056';
+date1 = '20170328'; % start with the pre-fear conditioning recording
+exptNo = '1';
 expt1 = {mouse,date1,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date1 mouse '_tifStacks_plane1_proc.mat'])
@@ -35,8 +35,8 @@ end
 
 %% Now open the file you want to map with it:
 
-date2 = '20170318'; % start with the pre-fear conditioning recording
-exptNo = '2';
+date2 = '20170403'; % start with the pre-fear conditioning recording
+exptNo = '1';
 expt2 = {mouse,date2,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date2 mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date2 mouse '_tifStacks_plane1_proc.mat'])
@@ -153,13 +153,14 @@ for ii=1:length(index2)
     end
 end
 plot(cent(index,1),cent(index,2),'gx')
-plot(cent2(index2,1),cent2(index2,2),'mx')
+plot(cent2(:,1),cent2(:,2),'mx')
 
 % Check there are no duplicates
 if length(unique(index))<length(index) || length(unique(index2))<length(index)
     disp('DUPLICATES!!!!')
 end
 
+disp([num2str(sum(~isnan(index2))) ' neurons matched'])
 
 %% save stuff
 

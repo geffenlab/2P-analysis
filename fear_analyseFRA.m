@@ -3,12 +3,12 @@
 % load processed file
 clear
 mouse = 'K048';
-date = '20170322';
+date = '20170315';
 exptNo = '2';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
 
-%% get Ca data
+% get Ca data
 n = find([dat.stat.iscell]==1);
 traces = dat.Fcell{1}(n,:); % raw fluorescence
 npilTraces = dat.FcellNeu{1}(n,:); % neuropil estimates
@@ -17,8 +17,8 @@ npilSubTraces = traces-(npilTraces.*npilCoeffs); % subtract neuropil from traces
 st = {dat.stat(n).st}; % spike times
 sa = {dat.stat(n).c}; % spike amplitudes (relative)
 
-%% load events
-stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
+% load events
+stimLoc=['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*events.mat']);
 if isempty(files)
     files = dir([stimLoc '*exptInfo.mat']);
@@ -27,16 +27,20 @@ events = load([stimLoc files(1).name]);
 
 fr = 1/(mean(diff(events.frameOn/events.fs))); % mean frame rate
 eventsOn = floor(events.eventOn/events.fs*fr);
-
-%% load stim info
-stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
+% eventsOn = eventsOn(1:end-4);
+% load stim info
+stimLoc=['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*stimInfo.mat']);
-load([stimLoc files(1).name])
+if ~isempty(files)
+    load([stimLoc files(1).name])
+else
+    stimInfo = events.exptInfo.stimInfo{1};
+end
 
 stimDur = stimInfo.tDur/1000;
 ITI = stimInfo.ITI/1000;
 
-%% Make raster
+% Make raster
 Wn = 14/fr/2;
 [b,a] = butter(5,Wn,'low');
 preEv = floor(1*fr); % 1 second before stim
@@ -54,38 +58,42 @@ spikeRaster = makeCaRaster(spikeTraces,eventsOn,preEv,postEv,0);
 
 % order it by frequency and attenuation
 p = stimInfo.index(stimInfo.order,:);
-order = repmat(p',1,floor(length(eventsOn)/length(stimInfo.order)))';
+% p = index(toneOrder);
+order = repmat(p',1,floor(length(eventsOn)/length(p)))';
 [x,ind]=sortrows(order);
 raster = raster(ind,:,:);
 rawRast = rawRast(ind,:,:);
 spikeRaster = spikeRaster(ind,:,:);
 
 
-%% Work out which cells respond to sounds
-uT = unique(order(:,1));
-uA = unique(order(:,2));
-resp=zeros(length(n),length(uT));
+% Work out which cells respond to sounds
+
+ha = zeros(1,length(n));
 for jj=1:length(n)
-    for ii=1:length(uT)
-        stdPre=zeros(1,length(uA)); auc=stdPre;
-        for kk=1:length(uA)
-            rows = x(:,1)==uT(ii) & x(:,2)==uA(kk);
-            stdPre(:,kk) = std(preRast(jj,:),[],2); % pre stimulus          
-            auc(:,kk) = mean(mean((rawRast(rows,preEv:preEv*2,jj)')));
-        end        
-        r1 = sum((auc)>stdPre);
-       resp(jj,ii) = r1;
-    end
+
+%         mPre=squeeze(std(rawRast(:,1:preEv-1,jj),[],2));
+%         mPost = squeeze(std(rawRast(:,preEv:preEv*3,jj),[],2));
+%         
+        mPre = std(raster(:,1:preEv-1,jj),[],2);
+        mPost = max(raster(:,preEv:preEv*3,jj),[],2);
+%         [ha(jj),p]=ttest(mPre*2,mPost);
+        ha(jj) = mean(mPre)*8<max(mPost);
+      
 end
 
-ha = sum(resp,2)>0;
+
+
+
+
+
 
 %% Work out FRAs
 window = [preEv+1,preEv+round(fr*1)];
-FRA = makeCaFRA(raster,window,x(:,1),x(:,2));
+FRA = makeCaFRA(raster,window,x(:,1),x(:,2),'trapz');
 spike_FRA = makeSpikeFRA(spikeRaster,window,x(:,1),x(:,2));
 filt = fspecial('gaussian',3,0.75);
-for ii=1:length(n); subplot(1,2,1); imagesc(conv2(FRA(:,:,ii),filt,'same'));hold on; subplot(122); imagesc(conv2(spike_FRA(:,:,ii),filt,'same'));colormap gray; pause();clf;end
+index = cellMatching.index(:,2);
+for ff=[8,11,113];ii=index(ff);  subplot(1,2,1); imagesc(conv2(FRA(:,:,ii),filt,'same'));hold on; subplot(122); imagesc(conv2(spike_FRA(:,:,ii),filt,'same'));colormap gray; pause();clf;end
 % % shuffle the FRAs - pretty sure this doesn't tell you anything useful
 % nShuf = 2000;
 % for ii=1:length(n)
@@ -96,7 +104,7 @@ for ii=1:length(n); subplot(1,2,1); imagesc(conv2(FRA(:,:,ii),filt,'same'));hold
 %     for xx = 1:size(FRA,1)
 %         for   yy=1:size(FRA,2)
 %             FRA_p(xx,yy,ii) = sum(sort(squeeze(FRA_shuf(xx,yy,:)))>=FRA(xx,yy,ii))/nShuf;
-%         end
+%         end 
 %     end
 % end
 
@@ -106,11 +114,12 @@ uT = unique(order(:,1));
 leg = num2str(uT);
 cs = colormap('hsv');
 cs=cs(1:floor(length(cs)/length(uT)):floor(length(cs)/length(uT))*length(uT),:);
-plotFig = 1;
+plotFig =0;
 
-index = find(ha==1);
-for ff = 40:sum(ha)
-    jj = index(ff);
+% index = find(ha==1);
+for ff = 1:size(raster,3)%
+%     jj = index(ff);[8,11]%1:sum(ha)%
+jj=(ff);
     psth = zeros(length(uT),size(raster,2));
     sempsth = psth;
     for ii=1:length(uT)
@@ -118,6 +127,8 @@ for ff = 40:sum(ha)
         psth(ii,:) = (mean(raster(rows,:,jj)));
         sempsth(ii,:) = std(raster(rows,:,jj))./sqrt(length(rows));
     end
+    
+    BF(ff) = uT(find(max(max(psth,[],2))==max(psth,[],2)));
     
     if plotFig==1
         time = (-preEv-1)/fr:1/fr:(postEv)/fr;
@@ -128,7 +139,7 @@ for ff = 40:sum(ha)
         end
         hold on
         for ii=1:size(psth,1)
-            patch([time fliplr(time)],[smooth(psth(ii,:)+sempsth(ii,:))' flipud(smooth(psth(ii,:)-sempsth(ii,:)))'],cs(ii,:),'FaceAlpha',0.2,'edgealpha',0)
+             patch([time fliplr(time)],[smooth(psth(ii,:)+sempsth(ii,:))' flipud(smooth(psth(ii,:)-sempsth(ii,:)))'],cs(ii,:),'FaceAlpha',0.2,'edgealpha',0)
         end
         a = psth(:,:); b = sempsth(:,:);
         plot([0 0],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
@@ -158,7 +169,7 @@ plotFig = 1;
 psth=[]; sempsth=[];
 f(1) = figure; f(2) = figure;
 h_attn=[];
-for jj=69:length(n)
+for jj=49:length(n)
     for ii=1:length(uT)
         psth = zeros(length(uA),size(raster,2))';
         sempsth = psth;
@@ -220,16 +231,63 @@ for jj=69:length(n)
 end
 
 
+%% 1) Plot mean by frequency across attenuations
+figure
+uT = unique(order(:,1));
+leg = num2str(uT);
+cs = colormap('hsv');
+cs=cs(1:floor(length(cs)/length(uT)):floor(length(cs)/length(uT))*length(uT),:);
+plotFig = 1;
+
+index = find(ha==1);
+for ff = 1:sum(ha)%size(raster,3)%
+    jj = index(ff);
+% jj=ff;
+    psth = zeros(length(uT),size(raster,2));
+    sempsth = psth;
+    for ii=1:length(uT)
+        rows = find(x(:,1)==uT(ii));
+        psth(ii,:) = (mean(spikeRaster(rows,:,jj)));
+        sempsth(ii,:) = std(spikeRaster(rows,:,jj))./sqrt(length(rows));
+    end
+    
+    if plotFig==1
+        time = (-preEv-1)/fr:1/fr:(postEv)/fr;
+        subplot(1,2,1)
+        for ii=1:size(psth,1)
+            plot(time,smooth(psth(ii,:))','-','LineWidth',2,'Color',cs(ii,:));
+            hold on
+        end
+        hold on
+        for ii=1:size(psth,1)
+            patch([time fliplr(time)],[smooth(psth(ii,:)+sempsth(ii,:))' flipud(smooth(psth(ii,:)-sempsth(ii,:)))'],cs(ii,:),'FaceAlpha',0.2,'edgealpha',0)
+        end
+        a = psth(:,:); b = sempsth(:,:);
+        plot([0 0],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
+        plot([stimInfo.tDur/1000 stimInfo.tDur/1000],[min(a(:)-b(:))-0.1 max(a(:)+b(:))+0.1],'r--','LineWidth',1);
+        legend(leg)
+        axis tight
+        subplot(1,2,2)
+        colormap('gray')
+        imagesc(spikeRaster(:,:,jj))
+        disp(jj)
+        pause()
+        clf
+    end
+    
+end
+
 %% plot figs
+
+cs = colormap('hsv');
+cs=cs(1:floor(length(cs)/length(uT)):floor(length(cs)/length(uT))*length(uT),:);
 f1 = figure;
 im = dat.mimg(:,:,2);
 im=brighten(im,1);
 colormap gray
 imagesc(im);
 uStim = unique(order(:,1));
-% ci = floor(length(co)/length(uT));
-cs = get(groot,'defaultAxesColorOrder');
-cs=[cs;cs;cs;cs];
+
 for ii =  1:length(n)
     img = zeros(1,size(im,1)*size(im,2));
     img(dat.stat(n(ii)).ipix)=1;
@@ -237,7 +295,7 @@ for ii =  1:length(n)
     c = regionprops(img,'Centroid');
     cent(ii,:) = round(c(end).Centroid);
     celln = num2str(ii);
-    t = text(c.Centroid(1)-5,c.Centroid(2)+7,celln); t.Color = [1 1 0];
+    t = text(c.Centroid(1)-3,c.Centroid(2),celln); t.Color = [1 1 0];
     s = [bwboundaries(img)];
     boundaries(ii) = s(1);
     hold on

@@ -1,8 +1,8 @@
-function [spFRA_out,FRA_out,uT,uA] = getToFRAs(cmSessions,mouse,dataLoc,cm,ss,method)
+function [raster_out,x,fr] = getToRasters(cmSessions,mouse,dataLoc,cm,ss,preEv,postEv)
 
 
 load([dataLoc mouse '\' cmSessions(cm).name])
-date1 = cell2mat(cellMatching.session{ss}(2)); % start with the pre-fear conditioning recording
+date1 = cell2mat(cellMatching.session{ss}(2)); 
 exptNo = cell2mat(cellMatching.session{ss}(3));
 dataLoc2 = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
 load([dataLoc2 exptNo '\F_' mouse '_' date1 mouse '_tifStacks_plane1_proc.mat'])
@@ -19,7 +19,7 @@ sa = {dat.stat(n).c}; % spike amplitudes (relative)
 
 
 % load events
-stimLoc=['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\' exptNo '\'];
+stimLoc=['C:\data\' mouse '\' date1 mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*events.mat']);
 if isempty(files)
     files = dir([stimLoc '*exptInfo.mat']);
@@ -29,20 +29,10 @@ events = load([stimLoc files(1).name]);
 fr = 1/(mean(diff(events.frameOn/events.fs))); % mean frame rate
 eventsOn = floor(events.eventOn/events.fs*fr);
 
-if strcmp(mouse,'K056') && strcmp(date1,'20170330')
-    eventsOn = eventsOn(1:end-4);
-end
-
 % load stim info
-stimLoc=['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\' exptNo '\'];
+stimLoc=['C:\data\' mouse '\' date1 mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*stimInfo.mat']);
-if ~isempty(files)
-    load([stimLoc files(1).name]);
-else
-    files  = dir([stimLoc '*exptInfo.mat']);
-    load([stimLoc files(1).name]);
-    stimInfo = exptInfo.stimInfo{1};
-end
+load([stimLoc files(1).name])
 
 stimDur = stimInfo.tDur/1000;
 ITI = stimInfo.ITI/1000;
@@ -51,8 +41,8 @@ ITI = stimInfo.ITI/1000;
 % Make raster
 Wn = 14/fr/2;
 [b,a] = butter(5,Wn,'low');
-preEv = floor(1*fr); % 1 second before stim
-postEv = ceil((stimDur+ITI)*fr); % 3 seconds post stim
+preEv = floor(preEv*fr); % 
+postEv = floor(postEv*fr); % 
 raster = makeCaRaster(npilSubTraces,eventsOn,preEv,postEv,1);
 rawRast = makeCaRaster(npilSubTraces,eventsOn,preEv,postEv,0);
 preRast = npilSubTraces(:,eventsOn(1)-preEv:eventsOn(1)-1);
@@ -69,27 +59,12 @@ p = stimInfo.index(stimInfo.order,:);
 order = repmat(p',1,floor(length(eventsOn)/length(stimInfo.order)))';
 [x,ind]=sortrows(order);
 raster = raster(ind,:,:);
-rawRast = rawRast(ind,:,:);
-spikeRaster = spikeRaster(ind,:,:);
 
-% Work out FRAs
-window = [preEv+1,preEv+round(fr*1)];
-FRA = makeCaFRA(raster,window,x(:,1),x(:,2),method);
-spike_FRA = makeSpikeFRA(spikeRaster,window,x(:,1),x(:,2));
-
-FRA_out = NaN(size(FRA,1),size(FRA,2),length(cellMatching.index));
 index = cellMatching.index(~isnan(cellMatching.index(:,ss)),ss);
 index2 = find(~isnan(cellMatching.index(:,ss)));
+raster_out = NaN(size(raster,1),size(raster,2),length(cellMatching.index));
 for ii = 1:length(index2)
-    FRA_out(:,:,index2(ii)) = FRA(:,:,index(ii));
+    raster_out(:,:,index2(ii)) = raster(:,:,index(ii));
 end
-
-spFRA_out = NaN(size(spike_FRA,1),size(spike_FRA,2),length(cellMatching.index));
-index = cellMatching.index(~isnan(cellMatching.index(:,ss)),ss);
-index2 = find(~isnan(cellMatching.index(:,ss)));
-for ii = 1:length(index2)
-    spFRA_out(:,:,index2(ii)) = spike_FRA(:,:,index(ii));
-end
-
-uT = unique(x(:,1));
-uA = unique(x(:,2));
+% rawRast = rawRast(ind,:,:);
+% spikeRaster = spikeRaster(ind,:,:);

@@ -32,6 +32,7 @@ recovered = imwarp(im2,cellMatching.transfrom,'OutputView',Roriginal);
 
 % Get the centroids
 a = find(~isnan(cellMatching.index(:,2)));
+b = cellMatching.index(find(~isnan(cellMatching.index(:,2))),2);
 
 % Plot the cell outlines
 imagesc(recovered)
@@ -40,8 +41,9 @@ hold on
 
 for ii=1:length(a)
     plot(cellMatching.ROIs{1}{a(ii)}(:,2),cellMatching.ROIs{1}{a(ii)}(:,1),'y');
-    text(cellMatching.centroids{2}(a(ii),1),cellMatching.centroids{2}(a(ii),2),num2str((ii)),'Color','m');
-    text(cellMatching.centroids{1}(ii,1),cellMatching.centroids{1}(ii,2),num2str(ii),'Color','y');
-    pause()
+    plot(cellMatching.ROIs{2}{b(ii)}(:,2),cellMatching.ROIs{2}{b(ii)}(:,1),'m');
+    text(cellMatching.centroids{1}(a(ii),1),cellMatching.centroids{1}(a(ii),2),num2str((ii)),'Color','y');
+%     text(cellMatching.centroids{1}(ii,1),cellMatching.centroids{1}(ii,2),num2str(ii),'Color','y');
+%     pause()
 end
 

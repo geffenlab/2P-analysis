@@ -1,4 +1,4 @@
-function fra = makeCaFRA(raster,window,tones,attns)
+function fra = makeCaFRA(raster,window,tones,attns,method)
 
 uT = unique(tones);
 uA = unique(attns);
@@ -13,7 +13,12 @@ for jj=1:size(raster,3)
             psth(:,kk) = mean(raster(rows,:,jj));
         end
         
-        auc(ii,:) = trapz(psth(window(1):window(2),:));       
+        switch method
+            case 'trapz'
+                auc(ii,:) = trapz(psth(window(1):window(2),:));       
+            case 'peak'
+                auc(ii,:) = max(psth(window(1):window(2),:));    
+        end
     end
     fra(:,:,jj) = auc';
 end
