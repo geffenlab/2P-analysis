@@ -1,8 +1,8 @@
 % load processed file
 clear
 mouse = 'K056';
-date = '20170324';
-exptNo = '1';
+date = '20170411';
+exptNo = '2';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date mouse '_tifStacks_plane1_proc.mat'])
 
@@ -31,8 +31,8 @@ npilSubTraces = traces-(npilTraces.*npilCoeffs); % subtract neuropil from traces
 
 %% Load the stimulus info
 
-stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
-files = dir([stimLoc '*events.mat']);
+% stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
+files = dir([dataLoc exptNo '\*exptInfo.mat']);
 load([stimLoc files.name])
 
 % Work out frame rate

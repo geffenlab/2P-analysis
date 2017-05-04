@@ -19,7 +19,7 @@ st = {dat.stat(n).st};
 
 %% Load the event traces
 
-stimLoc=['C:\data\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
+stimLoc=['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
 files = dir([stimLoc '*_events.mat']);
 load([stimLoc files(1).name])
 

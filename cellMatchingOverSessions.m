@@ -3,20 +3,21 @@
 clear
 close all
 mouse = 'K056';
-date1 = '20170328'; % start with the pre-fear conditioning recording
+date1 = '20170415'; % start with the pre-fear conditioning recording
 exptNo = '1';
 expt1 = {mouse,date1,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
 load([dataLoc exptNo '\F_' mouse '_' date1 mouse '_tifStacks_plane1_proc.mat'])
 n1 = find([dat.stat.iscell]==1);
-im = dat.mimg_proc(:,:,2);
+im = dat.mimg(:,:,2);
 im_norm1 =dat.mimg(:,:,2);
 im_norm1 = uint16(im_norm1);
 f1=figure;
 colormap gray
-% imb = brighten(double(im),0.25);
-% imagesc(imb)
-imagesc(im)
+imb = brighten(double(im),1);
+imb = brighten(double(imb),0.25);
+imagesc(imb)
+% imagesc(im)
 dat1 = dat;
 
 % get centroids and boundaries
@@ -35,21 +36,22 @@ end
 
 %% Now open the file you want to map with it:
 
-date2 = '20170403'; % start with the pre-fear conditioning recording
-exptNo = '1';
+date2 = '20170502'; % start with the pre-fear conditioning recording
+exptNo = '2';
 expt2 = {mouse,date2,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date2 mouse '_tifStacks\'];
-load([dataLoc exptNo '\F_' mouse '_' date2 mouse '_tifStacks_plane1_proc.mat'])
+proc = dir([dataLoc exptNo '\*proc.mat']);
+load([dataLoc exptNo '\' proc.name])
 n2 = find([dat.stat.iscell]==1);
-im2 = dat.mimg_proc(:,:,2);
+im2 = dat.mimg(:,:,2);
 im_norm2 = dat.mimg(:,:,2);
 im_norm2 = uint16(im_norm2);
 f2 = figure;
 colormap gray
-% im2b = brighten(double(im2),1);
-% im2b = brighten(double(im2b),0.25);
-% imagesc(im2b)
-imagesc(im2)
+im2b = brighten(double(im2),1);
+im2b = brighten(double(im2b),0.25);
+imagesc(im2b)
+% imagesc(im2)
 dat2 = dat;
 
 

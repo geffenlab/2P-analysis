@@ -1,11 +1,12 @@
 function [spFRA_out,FRA_out,uT,uA] = getToFRAs(cmSessions,mouse,dataLoc,cm,ss,method)
 
 
-load([dataLoc mouse '\' cmSessions(cm).name])
+load([dataLoc mouse '\fearCellMatching\' cmSessions(cm).name])
 date1 = cell2mat(cellMatching.session{ss}(2)); % start with the pre-fear conditioning recording
 exptNo = cell2mat(cellMatching.session{ss}(3));
 dataLoc2 = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
-load([dataLoc2 exptNo '\F_' mouse '_' date1 mouse '_tifStacks_plane1_proc.mat'])
+proc = dir([dataLoc2 exptNo '\*proc.mat']);
+load([dataLoc2 exptNo '\' proc.name])
 
 
 % get Ca data
@@ -14,9 +15,6 @@ traces = dat.Fcell{1}(n,:); % raw fluorescence
 npilTraces = dat.FcellNeu{1}(n,:); % neuropil estimates
 npilCoeffs = [dat.stat(n).neuropilCoefficient]'; % neuropil coefficients
 npilSubTraces = traces-(npilTraces.*npilCoeffs); % subtract neuropil from traces
-st = {dat.stat(n).st}; % spike times
-sa = {dat.stat(n).c}; % spike amplitudes (relative)
-
 
 % load events
 stimLoc=['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\' exptNo '\'];
@@ -28,6 +26,18 @@ events = load([stimLoc files(1).name]);
 
 fr = 1/(mean(diff(events.frameOn/events.fs))); % mean frame rate
 eventsOn = floor(events.eventOn/events.fs*fr);
+
+% process traces
+[bf,af] = butter(2,10/fr/2,'low'); % 10 is good for low pass
+for ii=1:size(npilSubTraces,1)
+    npilSubTraces(ii,:) = filtfilt(bf,af,double(npilSubTraces(ii,:)));
+%     npst_z(ii,:) = zscore(npilSubTraces(ii,:));
+end
+st = {dat.stat(n).st}; % spike times
+sa = {dat.stat(n).c}; % spike amplitudes (relative)
+
+
+
 
 if strcmp(mouse,'K056') && strcmp(date1,'20170330')
     eventsOn = eventsOn(1:end-4);
@@ -49,8 +59,6 @@ ITI = stimInfo.ITI/1000;
 
 
 % Make raster
-Wn = 14/fr/2;
-[b,a] = butter(5,Wn,'low');
 preEv = floor(1*fr); % 1 second before stim
 postEv = ceil((stimDur+ITI)*fr); % 3 seconds post stim
 raster = makeCaRaster(npilSubTraces,eventsOn,preEv,postEv,1);
