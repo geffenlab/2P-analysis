@@ -2,8 +2,8 @@
 
 clear
 close all
-mouse = 'K056';
-date1 = '20170415'; % start with the pre-fear conditioning recording
+mouse = 'K070';
+date1 = '20170728'; % start with the pre-fear conditioning recording
 exptNo = '1';
 expt1 = {mouse,date1,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date1 mouse '_tifStacks\'];
@@ -36,7 +36,7 @@ end
 
 %% Now open the file you want to map with it:
 
-date2 = '20170502'; % start with the pre-fear conditioning recording
+date2 = '20170730'; % start with the pre-fear conditioning recording
 exptNo = '2';
 expt2 = {mouse,date2,exptNo};
 dataLoc = ['E:\dataAnalysed\' mouse '\' date2 mouse '_tifStacks\'];

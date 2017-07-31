@@ -1,18 +1,19 @@
-function recInfo = readXmlFile(filename)
+function recInfo = readXmlFile_v2_20170730(filename)
 % read xml file
 fclose('all');
 x = fopen(filename);
 sForm = '%s'; nSamples = 1;
-stuffToExtract = {'.ome.tif','bitDepth','dwellTime','laserPower','laserWavelength','micronsPerPixel','objectiveLens','opticalZoom','pmtGain','ZAxis','Sequence type'};
+stuffToExtract = {'.ome.tif','bitDepth','dwellTime','laserPower','laserWavelength','micronsPerPixel','objectiveLens','opticalZoom','pmtGain','positionCurrent','Sequence type'};
 ste = stuffToExtract;
 nFrames = 0;
+counter = 0;
 tic
 while ~feof(x)
     data = textscan(x,sForm,nSamples,'Delimiter','\t');
-    
+    counter = counter+1;
     for ii=1:length(ste)
-        sf = strfind(data{1}{1},ste{ii});
-        if ~isempty(sf)
+        stf = strfind(data{1}{1},ste{ii});
+        if ~isempty(stf)
             
             switch ste{ii}
                 case 'bitDepth'
@@ -26,36 +27,36 @@ while ~feof(x)
                     ste(~cellfun(@isempty,strfind(ste,'dwellTime')))=[];
                     break
                 case 'laserPower'
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.pockels = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.pockels = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     ste(~cellfun(@isempty,strfind(ste,'laserPower')))=[];
                     break
                 case 'laserWavelength'
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.laserWavelength = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.laserWavelength = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     ste(~cellfun(@isempty,strfind(ste,'laserWavelength')))=[];
                     break
                 case 'micronsPerPixel'
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    mpp(1) = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    mpp(2) = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    mpp(1) = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    mpp(2) = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     recInfo.micronsPerPixel = mpp;
                     ste(~cellfun(@isempty,strfind(ste,'micronsPerPixel')))=[];
                     break
                 case 'objectiveLens'
                     qm = strfind(data{1}{1},'"');
                     recInfo.objective = data{1}{1}(qm(3)+1:qm(4)-1);
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.objectiveMag = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.objectiveNA = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.objectiveMag = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.objectiveNA = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     ste(~cellfun(@isempty,strfind(ste,'objectiveLens')))=[];
                     break
                 case 'opticalZoom'
@@ -64,18 +65,20 @@ while ~feof(x)
                     ste(~cellfun(@isempty,strfind(ste,'opticalZoom')))=[];
                     break
                 case 'pmtGain'
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.PMTgain_ch01 = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.PMTgain_ch02 = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.PMTgain_ch01 = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
+                    dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.PMTgain_ch02 = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     ste(~cellfun(@isempty,strfind(ste,'pmtGain')))=[];
                     break
-                case 'ZAxis'
-                    data = textscan(x,sForm,nSamples,'Delimiter','\t');
-                    qm = strfind(data{1}{1},'"');
-                    recInfo.Zdepth = str2double(data{1}{1}(qm(3)+1:qm(4)-1));
+                case 'positionCurrent'
+                    for zz=1:8
+                        dat = textscan(x,sForm,nSamples,'Delimiter','\t');
+                    end
+                    qm = strfind(dat{1}{1},'"');
+                    recInfo.Zdepth = str2double(dat{1}{1}(qm(3)+1:qm(4)-1));
                     ste(~cellfun(@isempty,strfind(ste,'ZAxis')))=[];
                     break
                 case 'Sequence type'

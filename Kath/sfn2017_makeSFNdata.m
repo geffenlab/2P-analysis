@@ -3,17 +3,19 @@ clear
 cmdataLoc = 'E:\dataAnalysed\K056\fearCellMatching\';
 cmfiles = dir([cmdataLoc '*cellMatch*.mat']);
 
+%%
+session=2;
 for ff=1:length(cmfiles)
     load([cmdataLoc cmfiles(ff).name])
-    mouse = cellMatching.session{2}{1};
-    date = cellMatching.session{2}{2};
-    exptNo = cellMatching.session{2}{3};
+    mouse = cellMatching.session{session}{1};
+    date = cellMatching.session{session}{2};
+    exptNo = cellMatching.session{session}{3};
     dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
     proc = dir([dataLoc exptNo '\*proc.mat']);
     load([dataLoc exptNo '\' proc.name])
     saveSig = 1;
     
-    % get Ca data
+    % get Ca & spike data
     n = find([dat.stat.iscell]==1);
     traces = dat.Fcell{1}(n,:); % raw fluorescence
     npilTraces = dat.FcellNeu{1}(n,:); % neuropil estimates
@@ -55,7 +57,7 @@ for ff=1:length(cmfiles)
     npst_f=[];
     for ii=1:size(npilSubTraces,1)
         npst_f(ii,:) = filtfilt(bf,af,double(npilSubTraces(ii,:)));
-%         npst_z(ii,:) = zscore(npilSubTraces(ii,:));
+        %         npst_z(ii,:) = zscore(npilSubTraces(ii,:));
     end
     
     raster = makeCaRaster(npst_f,eventsOn,preEv,postEv,1);
@@ -115,6 +117,7 @@ for ff=1:length(cmfiles)
         save(['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\' exptNo '\sigResp.mat'],'sig');
     end
     
+    % Get best frequencies and make freq-resp curve
     BF = zeros(1,size(raster,3));
     FRA = zeros(length(uT),size(raster,3));
     for jj=1:length(n)
@@ -131,9 +134,24 @@ for ff=1:length(cmfiles)
         BF(jj) = uT(max(FRA(:,jj))==FRA(:,jj));
     end
     
-    index = cellMatching.index(:,2);
+    % Get cell boundaries and centroid
+    ipix = {dat.stat(logical([dat.stat.iscell])).ipix};
+    im = dat.mimg(:,:,2);
+    boundaries = cell(length(n),1);
+    cent = zeros(length(n),2);
+    for jj=1:length(n)
+        img = zeros(1,size(im,1)*size(im,2));
+        img(ipix{jj})=1;
+        img = reshape(img,size(im,1),size(im,2));
+        centroid = regionprops(img,'Centroid');
+        cent(jj,:) = centroid.Centroid;
+        s = bwboundaries(img);
+        boundaries(jj) = s(1);
+    end
     
-    
+        
+    index = cellMatching.index(:,session);
+
     data(ff+1).mouse = mouse;
     data(ff+1).date = date;
     data(ff+1).exptNo = exptNo;
@@ -141,6 +159,8 @@ for ff=1:length(cmfiles)
     data(ff+1).BF = BF;
     data(ff+1).index = index;
     data(ff+1).sig = sig;
+    data(ff+1).boundaries = boundaries;
+    data(ff+1).centroids = cent;
 end
-    
+
 save(['E:\dataAnalysed\' mouse '\sfnData.mat'],'data')

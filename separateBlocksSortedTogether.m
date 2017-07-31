@@ -1,7 +1,7 @@
 % separate blocks sorted together:
 
-mouse = 'K056';
-date = '20170502';
+mouse = 'K073';
+date = '20170728';
 fold_loc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\'];
 folders = dir(fold_loc);
 folders(strcmp({folders.name},'.'))=[]; folders(strcmp({folders.name},'..'))=[];
@@ -46,7 +46,7 @@ end
 
 for ii=1:length(f)
     xml = dir([fold_loc f{ii} '\*xml']);
-    recInfo = readXmlFile([fold_loc f{ii} '\' xml.name]);
+    recInfo = readXmlFile_v2_20170730([fold_loc f{ii} '\' xml.name]);
     save([fold_loc f{ii} '\recInfo.mat'],'recInfo')
     ri(ii) = recInfo;
 end
@@ -68,9 +68,9 @@ datAll = dat;
 for ii=1:length(f)     
     if ~isempty(ei)
         ei_file = ei(ind(ii)).name;
-        movefile([fold_loc folders(2).name '\' ei_file],[fold_loc f{ii} '\'])
+        movefile([fold_loc folders.name '\' ei_file],[fold_loc f{ii} '\'])
     end
-    dat = datAll; dat.Fcell = dat.Fcell(ii); dat.FcellNeu = dat.FcellNeu(ii);
+    dat = datAll; dat.Fcell = dat.Fcell(ii); dat.FcellNeu = dat.FcellNeu(ii); dat.sp = dat.sp{ii};
     save([fold_loc f{ii} '\' proc.name],'dat');
 end
 

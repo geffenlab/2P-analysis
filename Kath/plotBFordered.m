@@ -4,7 +4,7 @@ clear
 
 sortAll = false;
 
-mouse = 'K056';
+mouse = 'K07';
 dataLoc = 'E:\dataAnalysed\';
 cmSessions = dir([dataLoc mouse '\fearCellMatching\*cellMatch*']);
 % cmSessions=cmSessions([6,8,9,10]);
@@ -34,6 +34,9 @@ for ff = 1:length(cmSessions)
         sfm = find(max(sm_FRA(:,ii,ff+1))==sm_FRA(:,ii,ff+1));
         if ~isnan(fm)
             BF(ii,ff+1) = fm;
+            if length(sfm)>1
+                sfm = sfm(randperm(length(sfm),1));
+            end
             SBF(ii,ff+1) = sfm;
         else
             BF(ii,ff+1) = NaN;
@@ -137,12 +140,12 @@ end
 % t = {'pre-FC','24hr post-FC','3 days post-FC','24hr post 2nd FC','3 days post 2nd FC','5 days post 2nd FC'};
 cs = colormap('cool'); close all;
 cs=cs(1:floor(length(cs)/size(m_FRA,3)):floor(length(cs)/size(m_FRA,3))*size(m_FRA,3),:);
-for ii=1:size(m_FRA,2)
+for ii=36:size(m_FRA,2)
     
-    for jj=1:size(m_FRA,3)
+    for jj=[1,2,4] %1:size(m_FRA,3)
         
 %         plot(m_FRA(:,ii,jj)/max(m_FRA(:,ii,jj)),'LineWidth',2,'Color',cs(jj,:))
-          plot(m_FRA(:,ii,jj),'LineWidth',2,'Color',cs(jj,:))
+          plot(SmoothGaus(m_FRA(:,ii,jj),1),'LineWidth',2,'Color',cs(jj,:))
         hold on
         
     end
