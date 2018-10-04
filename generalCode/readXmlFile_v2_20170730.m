@@ -3,7 +3,7 @@ function recInfo = readXmlFile_v2_20170730(filename)
 fclose('all');
 x = fopen(filename);
 sForm = '%s'; nSamples = 1;
-stuffToExtract = {'.ome.tif','bitDepth','dwellTime','laserPower','laserWavelength','micronsPerPixel','objectiveLens','opticalZoom','pmtGain','positionCurrent','Sequence type'};
+stuffToExtract = {'.ome.tif','date','bitDepth','dwellTime','laserPower','laserWavelength','micronsPerPixel','objectiveLens','opticalZoom','pmtGain','positionCurrent','Sequence type'};
 ste = stuffToExtract;
 nFrames = 0;
 counter = 0;
@@ -16,6 +16,11 @@ while ~feof(x)
         if ~isempty(stf)
             
             switch ste{ii}
+                case 'date'
+                    qm = strfind(data{1}{1},'"');
+                    recInfo.date = data{1}{1}(qm(3)+1:qm(4)-1);
+                    ste(~cellfun(@isempty,strfind(ste,'date')))=[];
+                    break
                 case 'bitDepth'
                     qm = strfind(data{1}{1},'"');
                     recInfo.bitDepth = str2double(data{1}{1}(qm(3)+1:qm(4)-1));

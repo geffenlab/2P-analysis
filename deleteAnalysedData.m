@@ -28,7 +28,7 @@ for ii=1:length(folders)
         
         for kk=1:length(ssdir)
             if isdir(['E:\dataAnalysed\' folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name])
-                if isdir(['H:\dataAnalysed\' folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name]) && isdir(['I:\dataAnalysed\' folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name])
+                if isdir(['G:\dataAnalysed\' folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name]) && isdir(['I:\dataAnalysed\' folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name])
                     files = dir([da folders(ii).name '\' subdir(jj).name '\' ssdir(kk).name]);
                     files(strcmp({files.name},'.'))=[];
                     files(strcmp({files.name},'..'))=[];
