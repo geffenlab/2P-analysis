@@ -1,4 +1,5 @@
 %% Makes tif stacks 2000 frames long and then transfers them to the 2P analysis computer via the 10 gigabit ethernet cable.
+%% This version (2) does NOT copy to the G drive before copying to the 2P analysis computer...
 % If the movefile stops working (can happen after windows update - I hate
 % Windows), go to network ans sharing center. Temporarily disable the
 % internet connection then click on the 'unidentified network' at the top
@@ -12,10 +13,11 @@
 % deleteAnalysedFiles if necessary)
 
 clear
+clc
 
 % Enter info here
-mouse = {'K099'};
-dateOfRecording = '20180320';
+mouse = {'K137','K138'};
+dateOfRecording = '20190130';
 dataLoc = 'E:\';
 % dataLoc = 'F:\ TEMP\';
 
@@ -58,7 +60,7 @@ for ii = 1:length(folders)
         %         fne = folders(ii).name(dash(1)+1:end);
         saveFolder = ['G:\TEMP\' dataFolder '_tifStacks\' sprintf('%d',ind) '\'];
         tiffStackMaker([dataPath folders(ii).name],'.ome',saveFileName,saveFolder);
-%         fprintf(fid,'\n%s,%s,%02d',dateOfRecording,saveFileName,ind);
+        fprintf(fid,'\n%s,%s,%02d',dateOfRecording,saveFileName,ind);
         
         otherData = dir([dataPath folders(ii).name]);
         otherData(strcmp({otherData.name},'.'))=[];
@@ -97,12 +99,27 @@ if ~isdir(['\\DESKTOP-GK8OVIP\data\' mouse{mm} '\' dataFolder '_tifStacks\'])
     mkdir(['\\DESKTOP-GK8OVIP\data\' mouse{mm} '\' dataFolder '_tifStacks\']);
 end
 % [Status, Msg] = FileRename(['G:\TEMP\' dataFolder '_tifStacks'], ['\\DESKTOP-GK8OVIP\data\' mouse{mm} '\']);
-movefile(['G:\TEMP\' dataFolder '_tifStacks'], ['\\DESKTOP-GK8OVIP\data\' mouse{mm} '\'])
+[SUCCESS,MESSAGE,MESSAGEID] = movefile(['G:\TEMP\' dataFolder '_tifStacks'], ['\\DESKTOP-GK8OVIP\data\' mouse{mm} '\']);
 disp('Finished moving data to 2P analysis computer')
 % delete raw files and move tifs to temporary drive
-disp('Moving raw movies to temp storage on G drive')
+disp('Deleting raw movies from 2P acquisition computer...')
 % [Status, Msg] = FileRename(dataPath(1:end-1), ['G:\tempDataStorage\' mouse{mm} '\']);
-movefile(dataPath(1:end-1), ['G:\tempDataStorage\' mouse{mm} '\']);
+% movefile(dataPath(1:end-1), ['G:\tempDataStorage\' mouse{mm} '\']);
+folders = dir(dataPath); folders = folders([folders.isdir]); folders = folders(cellfun(@isempty,strfind({folders.name},'.')));
+for ff = 1:length(folders)
+    subf = dir([dataPath folders(ff).name]); subf(~cellfun(@isempty,strfind({subf.name},'.')) & [subf.isdir]) = [];
+    files = subf(~[subf.isdir]);
+    cd([dataPath folders(ff).name])
+    delete((files.name));
+    subf = subf([subf.isdir]);
+    for ss = 1:length(subf)
+        files = dir([dataPath folders(ff).name filesep subf(ss).name]);
+        files(~cellfun(@isempty,strfind({files.name},'.')) & [files.isdir]) = [];
+        cd([dataPath folders(ff).name filesep subf(ss).name])
+        delete((files.name))
+        cd([dataPath folders(ff).name])
+    end
+end
 
 disp(['finished mouse ' sprintf('%02d',mm)]);
 
