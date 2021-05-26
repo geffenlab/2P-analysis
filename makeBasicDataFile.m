@@ -1,9 +1,9 @@
-% function makeBasicDataFile(mouse)
+  % function makeBasicDataFile(mouse)
 
 
 % load processed file
-mouse = 'MT002';
-date = '20180315';
+mouse = 'XD036';
+date = '20210422';
 exptNo = '1';
 dataLoc = ['E:\dataAnalysed\' mouse '\' date mouse '_tifStacks\' exptNo '\'];
 proc = dir([dataLoc '\*proc.mat']);
@@ -21,7 +21,7 @@ for ff = 1:length(f2a)
     %     mouse = f2a{ff}(bs(2)+1:bs(3)-1);
     date = f2a{ff}(bs(3)+1:bs(3)+8);
     files = dir([stimLoc '*events.mat']);
-    if isempty(files)
+    if isempty(files)  
         files = dir([stimLoc '*exptInfo.mat']) 
     end
     if ~isempty(files)
@@ -106,14 +106,14 @@ for ff = 1:length(f2a)
 %             
 %             if isfield(dat,'sp')
 %                 if iscell(dat.sp)
-                    spikes.raster = dat.sp{1}(calcium.n,:); % spike times
-                    spikes.kernel = dat.kernels{1};
-                    spikes.deconvTraces = dat.ca{1}(calcium.n,:);
+%                     spikes.raster = dat.sp{1}(calcium.n,:); % spike times
+%                     spikes.kernel = dat.kernels{1};
+%                     spikes.deconvTraces = dat.ca{1}(calcium.n,:);
 %                     spikes.kernel = dat.kernels;
 %                     spikes.raster = dat.sp(calcium.n,:);
 %                     spikes.deconvTraces = dat.ca(calcium.n,:);
 %                 else
-%                     spikes.raster = dat.sp(calcium.n,:); % spike times
+                    spikes.raster = dat.sp(calcium.n,:); % spike times
 %                 end
 %             else
 %                 spikes.raster = zeros(size(calcium.rawTraces));

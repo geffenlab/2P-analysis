@@ -1,7 +1,7 @@
 % separate blocks sorted together:
 clear
-mouse = {'MT021'};
-date = '20180821';
+mouse = {'K145','K147'};
+date = '20190402';
 
 for zz = 1:length(mouse)
     fold_loc = ['E:\dataAnalysed\' mouse{zz} '\' date mouse{zz} '_tifStacks\'];

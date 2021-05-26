@@ -1,6 +1,6 @@
 %% SET ALL DEFAULT OPTIONS HERE
-tic
-clear
+
+clear all
 
 % UPDATE Christmas 2016: number of clusters determined automatically, but
 % do specify the "diameter" of an average cell for best results. You can do this with either
@@ -8,14 +8,14 @@ clear
 
 % check out the README file for detailed instructions (and extra options)
 addpath('C:\Users\2P-analysis\Documents\GitHub\2P-analysis\localCopies_suite2P') % add the path to your make_db file
-addpath(genpath('C:\Users\2P-analysis\Documents\GitHub\OASIS_matlab\')); % add dec
+addpath(genpath('C:\Users\2P-analysis\Documents\GitHub\OASIS_matlab\')); % add deconvolution path
+
 % overwrite any of these default options in your make_db file for individual experiments
 suite2P_make_db_KCW; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
 
 ops0.toolbox_path = 'C:\Users\2P-analysis\Documents\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
-	addpath(genpath(ops0.toolbox_path)) % add local path to the toolboxonvolution path
-
+	addpath(genpath(ops0.toolbox_path)) % add local path to the toolbox
 else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
@@ -31,7 +31,7 @@ ops0.temp_tiff              = 'C:\_tempreg\temp.tif'; % copies each remote tiff 
 ops0.RegFileRoot            = 'C:\suite2PtempFolder_binary_files\';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
 ops0.ResultsSavePath        = 'E:\dataAnalysed\'; % a folder structure is created inside
-ops0.RegFileTiffLocation    = [];%'E:\dataAnalysed\'; % leave empty to NOT save registered tiffs (slow)
+ops0.RegFileTiffLocation    = ['E:\dataAnalysed\']; %'E:\dataAnalysed\'; % leave empty to NOT save registered tiffs (slow)
 ops0.regFileBinLocation     = [];%'E:\dataAnalysed\'; % save binary file:?  Added by Kath 20170827
 
 % registration options
@@ -66,14 +66,14 @@ end
 
 % spike deconvolution options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
-ops0.sensorTau              = 1; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
+ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = 1; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
 % ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)
 % ops0.sameKernel             = 1; % whether the same kernel should be estimated for all neurons (robust, only set to 0 if SNR is high and recordings are long)
 
 % ----- if you have a RED channel ---------------------- ------------%
 ops0.AlignToRedChannel      = 0; % compute registration offsets using red channel
-ops0.REDbinary              = 0; % make a binary file of registered red frames
+ops0.REDbinary              = 1; % make a binary file of registered red frames
 % if db.expred, then compute mean red image for green experiments with red
 % channel available while doing registration
 ops0.redMeanImg             = 0; 
@@ -128,4 +128,3 @@ end
 %% stuff to do after processing
 % moveAnalysedFiles
 disp('finished analysing')
-toc

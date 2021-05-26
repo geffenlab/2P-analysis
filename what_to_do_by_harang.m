@@ -4,5 +4,5 @@
 % run new_main, sort neurons, and save
 % processSingleBlocks OR separateBlocksSortedTogether if there is more than
 % one expt sorted together (i.e. multiple folders in your expt folders)
-
+% run makeBasicFile
 

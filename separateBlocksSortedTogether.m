@@ -1,7 +1,7 @@
 % separate blocks sorted together:
 clear
-mouse = {'K133'};
-date = {'20180917'};
+mouse = {'XD036'};
+date = {'20210422'}; 
 
 for zz = 1:length(mouse)
     for dd = 1:length(date)
@@ -20,19 +20,20 @@ for zz = 1:length(mouse)
             f{end+1} = folders(uu).name(us(end)+1:end); %#ok<SAGROW>
             
             %% Move the xml files ...
-            for ii=1:length(f)
+            for ii = 1:length(f)
                 fLoc = ['C:\data\' mouse{zz} '\' date{dd} mouse{zz} '_tifStacks\' f{ii} '\'];
                 if ~isdir([fold_loc f{ii} '\']); mkdir([fold_loc f{ii} '\']); end
                 files = dir(fLoc);
-                files(~cellfun(@isempty,strfind({files.name},'.tif')))=[];
-                files(~cellfun(@isempty,strfind({files.name},'.db')))=[];
-                files([files.isdir])=[];
+                files(~cellfun(@isempty,strfind({files.name},'.tif'))) = [];
+                files(~cellfun(@isempty,strfind({files.name},'.db'))) = [];
+                files([files.isdir]) = [];
                 for mm = 1:length(files)
                     movefile([fLoc files(mm).name],[fold_loc f{ii} '\']);
                 end
             end
             
             % get xml data
+            disp('Getting xml data')
             for ii=1:length(f)
                 xml = dir([fold_loc f{ii} '\*xml']);
                 recInfo = readXmlFile_v2_20170730([fold_loc f{ii} '\' xml.name]);
@@ -62,7 +63,7 @@ for zz = 1:length(mouse)
             exptInfoFold = ['C:\data\' mouse{zz} '\' date{dd} mouse{zz} '_tifStacks\*exptInfo.mat'];
             exf = dir(exptInfoFold);
             t = zeros(1,length(exf));
-            for ii=1:length(t)
+            for ii = 1:length(t)
                 us = strfind(exf(ii).name,'_');
                 %                 t(ii) = str2double(exf(ii).name(us(1)+1:us(1)+4)); % times of expt files
                 t(ii) = datenum(exf(ii).name(1:us(2)-1),'yymmdd_HHMMSS');
@@ -130,7 +131,7 @@ for zz = 1:length(mouse)
             
         end
         
-        clearvars -except mouse date
+        clearvars -except mouse date zz dd
     end
 end
 

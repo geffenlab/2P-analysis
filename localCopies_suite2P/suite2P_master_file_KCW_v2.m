@@ -1,6 +1,6 @@
 %% SET ALL DEFAULT OPTIONS HERE
-tic
-clear
+
+clear all
 
 % UPDATE Christmas 2016: number of clusters determined automatically, but
 % do specify the "diameter" of an average cell for best results. You can do this with either
@@ -8,14 +8,14 @@ clear
 
 % check out the README file for detailed instructions (and extra options)
 addpath('C:\Users\2P-analysis\Documents\GitHub\2P-analysis\localCopies_suite2P') % add the path to your make_db file
-addpath(genpath('C:\Users\2P-analysis\Documents\GitHub\OASIS_matlab\')); % add dec
+addpath(genpath('C:\Users\2P-analysis\Documents\GitHub\OASIS_matlab\')); % add deconvolution path
+
 % overwrite any of these default options in your make_db file for individual experiments
 suite2P_make_db_KCW; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
 
 ops0.toolbox_path = 'C:\Users\2P-analysis\Documents\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
-	addpath(genpath(ops0.toolbox_path)) % add local path to the toolboxonvolution path
-
+	addpath(genpath(ops0.toolbox_path)) % add local path to the toolbox
 else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
@@ -27,11 +27,11 @@ ops0.fig                    = 1; % turn off figure generation with 0
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
 ops0.RootStorage            = 'C:\data\'; % Suite2P assumes a folder structure, check out README file
-ops0.temp_tiff              = 'C:\_tempreg\temp.tif'; % copies each remote tiff locally first, into this file
+ops0.temp_tiff              = 'C:\data\_tempreg\temp.tif'; % copies each remote tiff locally first, into this file
 ops0.RegFileRoot            = 'C:\suite2PtempFolder_binary_files\';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
 ops0.ResultsSavePath        = 'E:\dataAnalysed\'; % a folder structure is created inside
-ops0.RegFileTiffLocation    = [];%'E:\dataAnalysed\'; % leave empty to NOT save registered tiffs (slow)
+ops0.RegFileTiffLocation    = []; %'E:\dataAnalysed\'; % leave empty to NOT save registered tiffs (slow)
 ops0.regFileBinLocation     = [];%'E:\dataAnalysed\'; % save binary file:?  Added by Kath 20170827
 
 % registration options
@@ -48,7 +48,7 @@ ops0.ShowCellMap            = 1; % during optimization, show a figure of the clu
 ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encourages localized clusters % usually 0.5
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering % usually 1000
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
-ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 
+ops0.signalExtraction       = 'surround'; % how to extract ROI and neuropil signals: 
 %  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
 %  'surround' (no cell overlaps, surround neuropil model)
 ops0.refine                 = 1; % whether or not to refine ROIs (refinement uses unsmoothed PCs to compute masks)
@@ -59,14 +59,14 @@ ops0.innerNeuropil  = 1; % padding around cell to exclude from neuropil
 ops0.outerNeuropil  = Inf; % radius of neuropil surround
 % if infinity, then neuropil surround radius is a function of cell size
 if isinf(ops0.outerNeuropil)
-    ops0.minNeuropilPixels = 400; % minimum number of pixels in neuropil surround
+    ops0.minNeuropilPixels = 100; % minimum number of pixels in neuropil surround
     ops0.ratioNeuropil     = 5; % ratio btw neuropil radius and cell radius
     % radius of surround neuropil = ops0.ratioNeuropil * (radius of cell)
 end
 
 % spike deconvolution options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
-ops0.sensorTau              = 1; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
+ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = 1; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
 % ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)
 % ops0.sameKernel             = 1; % whether the same kernel should be estimated for all neurons (robust, only set to 0 if SNR is high and recordings are long)
@@ -128,4 +128,3 @@ end
 %% stuff to do after processing
 % moveAnalysedFiles
 disp('finished analysing')
-toc
